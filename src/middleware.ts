@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 
-type Middleware = (
+export type Middleware = (
   req: IncomingMessage,
   res: ServerResponse<IncomingMessage>,
   next: () => void,
@@ -16,6 +16,7 @@ export const createMiddlewareStack = () => {
   const execute = (
     req: IncomingMessage,
     res: ServerResponse<IncomingMessage>,
+    onComplete: () => void,
   ) => {
     let index = 0
 
@@ -23,6 +24,8 @@ export const createMiddlewareStack = () => {
       if (index < middlewares.length) {
         const middleware = middlewares[index++]
         middleware(req, res, next)
+      } else {
+        onComplete()
       }
     }
 

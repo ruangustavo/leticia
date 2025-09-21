@@ -4,9 +4,18 @@ export const fruits = ['banana', 'pear', 'grape'] as const
 
 const app = leticia()
 
+app.use((_req, _res, next) => {
+  console.log('Middleware 1')
+  next()
+})
+
+app.use((_req, _res, next) => {
+  console.log('Middleware 2')
+  next()
+})
+
 app.get('/fruits', (_req, res) => {
-  res.writeHead(200, { 'Content-Type': 'application/json' })
-  res.end(JSON.stringify(fruits))
+  res.send(fruits)
 })
 
 app.listen(3000, () => {
