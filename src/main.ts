@@ -18,6 +18,10 @@ app.get('/fruits', (_req, res) => {
   res.send(fruits)
 })
 
+app.post('/fruits', (req, res) => {
+  res.send({ message: 'Fruit added', data: req.body })
+})
+
 app.listen(3000, () => {
   console.log('Server is running on port 3000')
 })

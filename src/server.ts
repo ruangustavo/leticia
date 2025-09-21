@@ -3,15 +3,10 @@ import {
   type IncomingMessage,
   type ServerResponse,
 } from 'node:http'
+import { adapter, type Request, type Response } from './adapter.ts'
 import { createMiddlewareStack, type Middleware } from './middleware.ts'
-import { adaptResponse } from './response.ts'
 
-export type Response = {
-  code: (code: number) => Response
-  send: (body: unknown) => Response
-}
-
-export type RouteCallback = (req: IncomingMessage, res: Response) => void
+export type RouteCallback = (req: Request, res: Response) => void
 
 type Method = 'GET' | 'POST' | 'PUT' | 'DELETE'
 
@@ -71,10 +66,10 @@ export const leticia = () => {
       return
     }
 
-    const responseAdapter = adaptResponse(res)
-
-    middlewares.execute(req, res, () => {
-      route.handler(req, responseAdapter)
+    middlewares.execute(req, res, async () => {
+      const request = await adapter.request(req)
+      const response = adapter.response(res)
+      route.handler(request, response)
     })
   }
 
