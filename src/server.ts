@@ -6,44 +6,63 @@ import {
 import { adapter, type Request, type Response } from './adapter.ts'
 import { createMiddlewareStack, type Middleware } from './middleware.ts'
 
-export type RouteCallback = (req: Request, res: Response) => void
+export type RouteCallback<TBody = unknown> = (
+  req: Request<TBody>,
+  res: Response,
+) => void
 
 type Method = 'GET' | 'POST' | 'PUT' | 'DELETE'
 
-interface Route {
+interface Route<TBody = unknown> {
   method: Method
   path: string
-  handler: RouteCallback
+  handler: RouteCallback<TBody>
 }
 
 export const leticia = () => {
-  const routes: Route[] = []
+  const routes: Route<any>[] = []
 
   const middlewares = createMiddlewareStack()
 
-  const addRoute = (method: Method, path: string, callback: RouteCallback) =>
+  const addRoute = <TBody = unknown>(
+    method: Method,
+    path: string,
+    callback: RouteCallback<TBody>,
+  ) =>
     routes.push({
       method: method,
       path: path,
       handler: callback,
     })
 
-  const get = (path: string, callback: RouteCallback) => {
+  const get = <TBody = unknown>(
+    path: string,
+    callback: RouteCallback<TBody>,
+  ) => {
     addRoute('GET', path, callback)
     return app
   }
 
-  const post = (path: string, callback: RouteCallback) => {
+  const post = <TBody = unknown>(
+    path: string,
+    callback: RouteCallback<TBody>,
+  ) => {
     addRoute('POST', path, callback)
     return app
   }
 
-  const put = (path: string, callback: RouteCallback) => {
+  const put = <TBody = unknown>(
+    path: string,
+    callback: RouteCallback<TBody>,
+  ) => {
     addRoute('PUT', path, callback)
     return app
   }
 
-  const deleteHandler = (path: string, callback: RouteCallback) => {
+  const deleteHandler = <TBody = unknown>(
+    path: string,
+    callback: RouteCallback<TBody>,
+  ) => {
     addRoute('DELETE', path, callback)
     return app
   }

@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 
-export interface Request {
-  body: unknown
+export interface Request<TBody = unknown> {
+  body: TBody
 }
 
 export interface Response {

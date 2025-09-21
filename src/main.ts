@@ -1,3 +1,4 @@
+import type { Request } from './adapter.ts'
 import { leticia } from './server.ts'
 
 export const fruits = ['banana', 'pear', 'grape'] as const
@@ -18,8 +19,12 @@ app.get('/fruits', (_req, res) => {
   res.send(fruits)
 })
 
-app.post('/fruits', (req, res) => {
-  res.send({ message: 'Fruit added', data: req.body })
+interface Fruit {
+  name: string
+}
+
+app.post('/fruits', (req: Request<Fruit>, res) => {
+  res.send({ message: 'Fruit added', body: req.body })
 })
 
 app.listen(3000, () => {
