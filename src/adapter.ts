@@ -9,9 +9,33 @@ export interface Response {
   send: (body: unknown) => Response
 }
 
+export const hasRequestBody = (req: IncomingMessage) => {
+  const contentLength = req.headers['content-length']
+  if (contentLength) {
+    return parseInt(contentLength, 10) > 0
+  }
+
+  const methodsWithoutBody: IncomingMessage['method'][] = [
+    'GET',
+    'HEAD',
+    'OPTIONS',
+  ]
+
+  if (methodsWithoutBody.includes(req.method)) {
+    return false
+  }
+
+  return req.headers['content-type'] && req.headers['content-type'] !== ''
+}
+
 export const adapter = {
   request: (req: IncomingMessage): Promise<Request> => {
     return new Promise((resolve, reject) => {
+      if (!hasRequestBody(req)) {
+        resolve({ body: null })
+        return
+      }
+
       let requestBody = ''
 
       req.on('data', (chunk) => {
