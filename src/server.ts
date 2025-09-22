@@ -87,12 +87,15 @@ export const leticia = () => {
     const url = new URL(req.url, 'http://localhost')
     const pathname = url.pathname
 
-    const candidatesRoutes = routes.filter(
-      (route) => route.method === req.method,
-    )
     let foundRoute: { route: Route; params: Record<string, string> } | undefined
 
-    for (const route of candidatesRoutes) {
+    for (const route of routes) {
+      if (route.method !== req.method) {
+        res.writeHead(405, { 'Content-Type': 'application/json' })
+        res.end(JSON.stringify({ error: 'Method Not Allowed' }))
+        return
+      }
+
       const matchedRoute = matchRoute(route.path, pathname)
       if (matchedRoute.matched) {
         foundRoute = { route, params: matchedRoute.params }
