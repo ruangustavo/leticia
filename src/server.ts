@@ -3,21 +3,49 @@ import {
   type IncomingMessage,
   type ServerResponse,
 } from 'node:http'
-import { adapter, type LeticiaRequest } from './adapter.ts'
+import {
+  adapter,
+  type LeticiaRequest,
+  type LeticiaResponse,
+} from './adapter.ts'
 import { PayloadTooLargeError } from './errors.ts'
+import { matchRoute } from './matcher.ts'
 import { createMiddlewareStack, type Middleware } from './middleware.ts'
-import { createRouter, type Handler } from './router.ts'
+
+type Method = 'GET' | 'POST' | 'PUT' | 'DELETE'
+
+type Handler<TPath extends string, TBody = unknown> = (
+  req: LeticiaRequest<TBody, TPath>,
+  res: LeticiaResponse,
+) => void
+
+interface Route<TPath extends string = string, TBody = unknown> {
+  method: Method
+  path: TPath
+  handler: Handler<TPath, TBody>
+}
 
 export const leticia = () => {
-  const router = createRouter()
+  const routes: Route<any, any>[] = []
 
   const middlewares = createMiddlewareStack()
+
+  const addRoute = <TPath extends string, TBody = unknown>(
+    method: Method,
+    path: TPath,
+    callback: Handler<TPath, TBody>,
+  ) =>
+    routes.push({
+      method: method,
+      path: path,
+      handler: callback,
+    })
 
   const get = <TPath extends string, TBody = unknown>(
     path: TPath,
     callback: Handler<TPath, TBody>,
   ) => {
-    router.add('GET', path, callback)
+    addRoute('GET', path, callback)
     return app
   }
 
@@ -25,7 +53,7 @@ export const leticia = () => {
     path: TPath,
     callback: Handler<TPath, TBody>,
   ) => {
-    router.add('POST', path, callback)
+    addRoute('POST', path, callback)
     return app
   }
 
@@ -33,7 +61,7 @@ export const leticia = () => {
     path: TPath,
     callback: Handler<TPath, TBody>,
   ) => {
-    router.add('PUT', path, callback)
+    addRoute('PUT', path, callback)
     return app
   }
 
@@ -41,7 +69,7 @@ export const leticia = () => {
     path: TPath,
     callback: Handler<TPath, TBody>,
   ) => {
-    router.add('DELETE', path, callback)
+    addRoute('DELETE', path, callback)
     return app
   }
 
@@ -60,23 +88,25 @@ export const leticia = () => {
     const url = new URL(req.url, 'http://localhost')
     const pathname = url.pathname
 
-    const dispatchResult = router.dispatch({
-      method: req.method,
-      pathname,
-    })
+    let foundRoute: { route: Route; params: Record<string, string> } | undefined
 
-    if (dispatchResult.type === 'notFound') {
-      res.writeHead(404, { 'Content-Type': 'application/json' })
-      res.end(JSON.stringify({ error: 'Not Found' }))
-      return
+    for (const route of routes) {
+      if (route.method !== req.method) {
+        res.writeHead(405, { 'Content-Type': 'application/json' })
+        res.end(JSON.stringify({ error: 'Method Not Allowed' }))
+        return
+      }
+
+      const matchedRoute = matchRoute(route.path, pathname)
+      if (matchedRoute.matched) {
+        foundRoute = { route, params: matchedRoute.params }
+        break
+      }
     }
 
-    if (dispatchResult.type === 'methodNotAllowed') {
-      res.writeHead(405, {
-        'Content-Type': 'application/json',
-        Allow: dispatchResult.allowed.join(', '),
-      })
-      res.end(JSON.stringify({ error: 'Method Not Allowed' }))
+    if (!foundRoute) {
+      res.writeHead(404, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ error: 'Not Found' }))
       return
     }
 
@@ -96,10 +126,10 @@ export const leticia = () => {
       if (!request) return
 
       const response = adapter.response(res)
-      request.params = dispatchResult.params
+      request.params = foundRoute.params
       request.query = Object.fromEntries(url.searchParams)
       request.headers = req.headers
-      dispatchResult.handler(request, response)
+      foundRoute.route.handler(request, response)
     })
   }
 
