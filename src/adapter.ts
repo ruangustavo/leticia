@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 
 export interface Request<TBody = unknown> {
   body: TBody
+  params: Record<string, string>
 }
 
 export interface Response {
@@ -32,7 +33,7 @@ export const adapter = {
   request: (req: IncomingMessage): Promise<Request> => {
     return new Promise((resolve, reject) => {
       if (!hasRequestBody(req)) {
-        resolve({ body: null })
+        resolve({ body: null, params: {} })
         return
       }
 
@@ -45,7 +46,7 @@ export const adapter = {
       req.on('end', () => {
         try {
           const body = JSON.parse(requestBody)
-          resolve({ body })
+          resolve({ body, params: {} })
         } catch (error) {
           reject(error)
         }

@@ -105,7 +105,7 @@ export const leticia = () => {
     middlewares.execute(req, res, async () => {
       const request = await adapter.request(req)
       const response = adapter.response(res)
-      ;(request as any).params = foundRoute.params
+      request.params = foundRoute.params
       foundRoute.route.handler(request, response)
     })
   }
