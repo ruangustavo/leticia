@@ -15,8 +15,8 @@ app.use((_req, _res, next) => {
   next()
 })
 
-app.get('/fruits', (_req, res) => {
-  res.send(fruits)
+app.get('/fruits/:fruitId', (req, res) => {
+  res.send({ fruits, fruitId: req.params.fruitId })
 })
 
 interface Fruit {
