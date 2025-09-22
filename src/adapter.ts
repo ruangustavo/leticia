@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import type { ParamsFromPath } from './types.ts'
+import type { HTTPHeaders } from './types/headers.ts'
+import type { ParamsFromPath } from './types/path.ts'
 
 export interface LeticiaRequest<
   TBody = unknown,
@@ -9,6 +10,7 @@ export interface LeticiaRequest<
   body: TBody
   params: TParams
   querystring: Record<string, string | string[]>
+  headers: HTTPHeaders
 }
 
 export interface LeticiaResponse {
@@ -39,7 +41,7 @@ export const adapter = {
   request: (req: IncomingMessage): Promise<LeticiaRequest> => {
     return new Promise((resolve, reject) => {
       if (!hasRequestBody(req)) {
-        resolve({ body: null, params: {}, querystring: {} })
+        resolve({ body: null, params: {}, querystring: {}, headers: {} })
         return
       }
 
@@ -52,7 +54,7 @@ export const adapter = {
       req.on('end', () => {
         try {
           const body = JSON.parse(requestBody)
-          resolve({ body, params: {}, querystring: {} })
+          resolve({ body, params: {}, querystring: {}, headers: {} })
         } catch (error) {
           reject(error)
         }
