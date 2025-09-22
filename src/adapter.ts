@@ -1,4 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import { parse as parseQueryString } from 'node:querystring'
 import type { HTTPHeaders } from './types/headers.ts'
 import type { ParamsFromPath } from './types/path.ts'
 
@@ -45,15 +46,40 @@ export const adapter = {
         return
       }
 
-      let requestBody = ''
+      let totalLength = 0
+      const maxBytes = 1 * 1024 * 1024 // 1 Mb
+
+      const chunks: Buffer[] = []
 
       req.on('data', (chunk) => {
-        requestBody += chunk
+        totalLength += chunk.length
+
+        if (totalLength > maxBytes) {
+          req.destroy(new Error('Payload too large'))
+          return
+        }
+
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
       })
 
       req.on('end', () => {
         try {
-          const body = JSON.parse(requestBody)
+          const buffer = Buffer.concat(chunks)
+          const contentType = req.headers['content-type']?.toLowerCase()
+          if (!contentType) return
+          const mime = contentType.split(';')[0].trim()
+
+          const text = buffer.toString('utf8')
+
+          let body = null
+          if (mime === 'application/json') {
+            body = text.length ? JSON.parse(text) : null
+          } else if (mime === 'application/x-www-form-urlencoded') {
+            body = parseQueryString(text)
+          } else {
+            body = text
+          }
+
           resolve({ body, params: {}, querystring: {}, headers: {} })
         } catch (error) {
           reject(error)
