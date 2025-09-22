@@ -18,7 +18,7 @@ app.use((_req, _res, next) => {
 app.get('/fruits/:fruitId/:fooId?', (req, res) => {
   res.send({
     fruits,
-    fruitId: req.params.fruitId,
+    fruitId: req.params.fooId,
     querystring: req.query,
   })
 })
