@@ -67,8 +67,7 @@ export const adapter = {
         try {
           const buffer = Buffer.concat(chunks)
           const contentType = req.headers['content-type']?.toLowerCase()
-          if (!contentType) return
-          const mime = contentType.split(';')[0].trim()
+          const mime = contentType ? contentType.split(';')[0].trim() : null
 
           const text = buffer.toString('utf8')
 
@@ -77,6 +76,8 @@ export const adapter = {
             body = text.length ? JSON.parse(text) : null
           } else if (mime === 'application/x-www-form-urlencoded') {
             body = parseQueryString(text)
+          } else if (!mime) {
+            body = text.length ? text : null
           } else {
             body = text
           }
