@@ -7,8 +7,10 @@ type SetContentType =
   | 'application/xml'
   | 'application/octet-stream'
 
-export interface HTTPHeaders {
-  [key: string]: string | number | undefined
+export type HTTPHeaders = Record<
+  string,
+  string | number | string[] | undefined
+> & {
   'www-authenticate'?: string
   authorization?: string
   'proxy-authenticate'?: string
@@ -34,7 +36,7 @@ export interface HTTPHeaders {
   expect?: string
   'max-forwards'?: string
   cookie?: string
-  'set-cookie'?: string
+  'set-cookie'?: string | string[]
   'access-control-allow-origin'?: string
   'access-control-allow-credentials'?: string
   'access-control-allow-headers'?: string
