@@ -15,7 +15,7 @@ app.use((_req, _res, next) => {
   next()
 })
 
-app.get('/fruits/:fruitId', (req, res) => {
+app.get('/fruits/:fruitId', (req: Request<unknown>, res) => {
   res.send({ fruits, fruitId: req.params.fruitId })
 })
 

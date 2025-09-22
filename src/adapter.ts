@@ -1,8 +1,8 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 
-export interface Request<TBody = unknown> {
+export interface Request<TBody = unknown, TParams = Record<string, string>> {
   body: TBody
-  params: Record<string, string>
+  params: TParams
 }
 
 export interface Response {

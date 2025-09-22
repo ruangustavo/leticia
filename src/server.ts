@@ -7,28 +7,28 @@ import { adapter, type Request, type Response } from './adapter.ts'
 import { matchRoute } from './matcher.ts'
 import { createMiddlewareStack, type Middleware } from './middleware.ts'
 
-export type RouteCallback<TBody = unknown> = (
-  req: Request<TBody>,
+export type RouteCallback<TBody = unknown, TParams = Record<string, string>> = (
+  req: Request<TBody, TParams>,
   res: Response,
 ) => void
 
 type Method = 'GET' | 'POST' | 'PUT' | 'DELETE'
 
-interface Route<TBody = unknown> {
+interface Route<TBody = unknown, TParams = Record<string, string>> {
   method: Method
   path: string
-  handler: RouteCallback<TBody>
+  handler: RouteCallback<TBody, TParams>
 }
 
 export const leticia = () => {
-  const routes: Route<any>[] = []
+  const routes: Route<any, any>[] = []
 
   const middlewares = createMiddlewareStack()
 
-  const addRoute = <TBody = unknown>(
+  const addRoute = <TBody = unknown, TParams = Record<string, string>>(
     method: Method,
     path: string,
-    callback: RouteCallback<TBody>,
+    callback: RouteCallback<TBody, TParams>,
   ) =>
     routes.push({
       method: method,
@@ -36,33 +36,33 @@ export const leticia = () => {
       handler: callback,
     })
 
-  const get = <TBody = unknown>(
+  const get = <TBody = unknown, TParams = Record<string, string>>(
     path: string,
-    callback: RouteCallback<TBody>,
+    callback: RouteCallback<TBody, TParams>,
   ) => {
     addRoute('GET', path, callback)
     return app
   }
 
-  const post = <TBody = unknown>(
+  const post = <TBody = unknown, TParams = Record<string, string>>(
     path: string,
-    callback: RouteCallback<TBody>,
+    callback: RouteCallback<TBody, TParams>,
   ) => {
     addRoute('POST', path, callback)
     return app
   }
 
-  const put = <TBody = unknown>(
+  const put = <TBody = unknown, TParams = Record<string, string>>(
     path: string,
-    callback: RouteCallback<TBody>,
+    callback: RouteCallback<TBody, TParams>,
   ) => {
     addRoute('PUT', path, callback)
     return app
   }
 
-  const deleteHandler = <TBody = unknown>(
+  const deleteHandler = <TBody = unknown, TParams = Record<string, string>>(
     path: string,
-    callback: RouteCallback<TBody>,
+    callback: RouteCallback<TBody, TParams>,
   ) => {
     addRoute('DELETE', path, callback)
     return app
