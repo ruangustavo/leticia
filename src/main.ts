@@ -16,7 +16,11 @@ app.use((_req, _res, next) => {
 })
 
 app.get('/fruits/:fruitId/:fooId?', (req, res) => {
-  res.send({ fruits, fruitId: req.params.fruitId })
+  res.send({
+    fruits,
+    fruitId: req.params.fruitId,
+    querystring: req.querystring,
+  })
 })
 
 interface Fruit {

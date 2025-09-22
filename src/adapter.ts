@@ -8,6 +8,7 @@ export interface LeticiaRequest<
 > {
   body: TBody
   params: TParams
+  querystring: Record<string, string | string[]>
 }
 
 export interface LeticiaResponse {
@@ -38,7 +39,7 @@ export const adapter = {
   request: (req: IncomingMessage): Promise<LeticiaRequest> => {
     return new Promise((resolve, reject) => {
       if (!hasRequestBody(req)) {
-        resolve({ body: null, params: {} })
+        resolve({ body: null, params: {}, querystring: {} })
         return
       }
 
@@ -51,7 +52,7 @@ export const adapter = {
       req.on('end', () => {
         try {
           const body = JSON.parse(requestBody)
-          resolve({ body, params: {} })
+          resolve({ body, params: {}, querystring: {} })
         } catch (error) {
           reject(error)
         }
