@@ -1,13 +1,18 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import type { ParamsFromPath } from './types.ts'
 
-export interface Request<TBody = unknown, TParams = Record<string, string>> {
+export interface LeticiaRequest<
+  TBody = unknown,
+  TPattern extends string = string,
+  TParams = ParamsFromPath<TPattern>,
+> {
   body: TBody
   params: TParams
 }
 
-export interface Response {
-  code: (code: number) => Response
-  send: (body: unknown) => Response
+export interface LeticiaResponse {
+  code: (code: number) => LeticiaResponse
+  send: (body: unknown) => LeticiaResponse
 }
 
 export const hasRequestBody = (req: IncomingMessage) => {
@@ -30,7 +35,7 @@ export const hasRequestBody = (req: IncomingMessage) => {
 }
 
 export const adapter = {
-  request: (req: IncomingMessage): Promise<Request> => {
+  request: (req: IncomingMessage): Promise<LeticiaRequest> => {
     return new Promise((resolve, reject) => {
       if (!hasRequestBody(req)) {
         resolve({ body: null, params: {} })

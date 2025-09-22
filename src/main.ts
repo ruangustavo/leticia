@@ -1,5 +1,5 @@
-import type { Request } from './adapter.ts'
-import { leticia } from './server.ts'
+import type { LeticiaRequest } from './adapter.ts'
+import { leticia } from './index.ts'
 
 export const fruits = ['banana', 'pear', 'grape'] as const
 
@@ -15,7 +15,7 @@ app.use((_req, _res, next) => {
   next()
 })
 
-app.get('/fruits/:fruitId', (req: Request<unknown>, res) => {
+app.get('/fruits/:fruitId/:fooId?', (req, res) => {
   res.send({ fruits, fruitId: req.params.fruitId })
 })
 
@@ -23,7 +23,7 @@ interface Fruit {
   name: string
 }
 
-app.post('/fruits', (req: Request<Fruit>, res) => {
+app.post('/fruits', (req: LeticiaRequest<Fruit>, res) => {
   res.send({ message: 'Fruit added', body: req.body })
 })
 
