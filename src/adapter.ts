@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { parse as parseQueryString } from 'node:querystring'
+import { PayloadTooLargeError } from './errors.ts'
 import type { HTTPHeaders } from './types/headers.ts'
 import type { ParamsFromPath } from './types/path.ts'
 
@@ -55,7 +56,7 @@ export const adapter = {
         totalLength += chunk.length
 
         if (totalLength > maxBytes) {
-          req.destroy(new Error('Payload too large'))
+          req.destroy(new PayloadTooLargeError('Payload too large'))
           return
         }
 

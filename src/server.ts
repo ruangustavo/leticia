@@ -8,6 +8,7 @@ import {
   type LeticiaRequest,
   type LeticiaResponse,
 } from './adapter.ts'
+import { PayloadTooLargeError } from './errors.ts'
 import { matchRoute } from './matcher.ts'
 import { createMiddlewareStack, type Middleware } from './middleware.ts'
 
@@ -110,7 +111,20 @@ export const leticia = () => {
     }
 
     middlewares.execute(req, res, async () => {
-      const request = await adapter.request(req)
+      let request: LeticiaRequest | undefined
+
+      try {
+        request = await adapter.request(req)
+      } catch (error) {
+        if (error instanceof PayloadTooLargeError) {
+          res.writeHead(413, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ error: 'Payload too large' }))
+          return
+        }
+      }
+
+      if (!request) return
+
       const response = adapter.response(res)
       request.params = foundRoute.params
       request.query = Object.fromEntries(url.searchParams)
