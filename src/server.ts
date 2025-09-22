@@ -110,7 +110,7 @@ export const leticia = () => {
       const request = await adapter.request(req)
       const response = adapter.response(res)
       request.params = foundRoute.params
-      request.querystring = Object.fromEntries(url.searchParams)
+      request.query = Object.fromEntries(url.searchParams)
       request.headers = req.headers
       foundRoute.route.handler(request, response)
     })

@@ -1,6 +1,6 @@
 export type {
-  LeticiaRequest as Request,
-  LeticiaResponse as Response,
+  LeticiaRequest,
+  LeticiaResponse,
 } from './adapter.ts'
 export { adapter } from './adapter.ts'
 export type { Middleware } from './middleware.ts'

@@ -10,7 +10,7 @@ export interface LeticiaRequest<
 > {
   body: TBody
   params: TParams
-  querystring: Record<string, string | string[]>
+  query: Record<string, string | string[]>
   headers: HTTPHeaders
 }
 
@@ -42,7 +42,7 @@ export const adapter = {
   request: (req: IncomingMessage): Promise<LeticiaRequest> => {
     return new Promise((resolve, reject) => {
       if (!hasRequestBody(req)) {
-        resolve({ body: null, params: {}, querystring: {}, headers: {} })
+        resolve({ body: null, params: {}, query: {}, headers: {} })
         return
       }
 
@@ -80,7 +80,7 @@ export const adapter = {
             body = text
           }
 
-          resolve({ body, params: {}, querystring: {}, headers: {} })
+          resolve({ body, params: {}, query: {}, headers: {} })
         } catch (error) {
           reject(error)
         }
